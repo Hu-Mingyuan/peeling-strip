@@ -1,0 +1,405 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,mathtools}
+\usepackage[margin=24mm]{geometry}
+\usepackage{microtype,booktabs,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{lemma}{Lemma}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\e}{\mathbf e}
+\newcommand{\pos}[1]{[#1]_+}
+\newcommand{\strip}{\mathrm{strip}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist{nosep,leftmargin=*}
+\title{Deleting the middle edge of an FG strip\\\large Proof blueprint for a theorem of \emph{Ice and mirrors}}
+\author{Cluster HMS}
+\date{14 November 2026}
+\begin{document}
+\maketitle
+\vspace{-1.5em}
+This is the supplied mathematical proof to formalize, from \texttt{main.tex}.
+The source commit is
+\begin{center}\texttt{7e310e01df64e38be583500fc81a8ef1a001a196}.\end{center}
+The companion \emph{Target theorem} specifies the universal Lean statement.
+The identities below are proof obligations, not reports of completed Lean proofs.
+The choice of formal definitions and proof decomposition is left to the formalization.
+
+\section{The matrix calculation and its ambient scope}
+For every $n\ge2$ and $N\ge\max\{\lfloor n/2\rfloor,2\}$, use the strip
+\[
+ \tau_{2i+1}=(T_{i+1},T_i,B_i),\quad
+ \tau_{2i+2}=(B_i,B_{i+1},T_{i+1})\quad(0\le i<N),
+\]
+with $e_{2i}=T_iB_i$, $e_{2i+1}=T_{i+1}B_i$ and distinguished edge $e_N$.
+The lattice points in each triangle have $a+b+c=n$ and exclude the corners.
+The signed matrix is the sum of the cycles
+\begin{equation}\label{eq:cycles}
+ (a+1,b+1,c)\longrightarrow(a,b+1,c+1)
+ \longrightarrow(a+1,b,c+1)\longrightarrow(a+1,b+1,c),
+ \quad a+b+c=n-2.
+\end{equation}
+Glue equal edge weights and omit the actual top and bottom boundary vertices.
+Positive $B_{uv}$ denotes $u\to v$. Put $\rho_Q(v)=B_{v,*}$.
+The vector $\e_w$ is the coordinate vector on the current live set;
+it is zero when the label $w$ is absent. Repeated labels contribute with
+their summed coefficients.
+
+Write $I=V_{\strip}\setminus(L(e_0)\cup L(e_{2N}))$.
+The ambient matrix on a finite set $V$ is
+\[
+ B=A+E,\qquad A=B_{\strip,\mathrm{ext}},\qquad
+ E^\mathsf{T}=-E,\qquad E_{\iota(x),v}=0\ (x\in I,\ v\in V).
+\]
+If $E_{k,*}=0$, skew-symmetry gives $E_{*,k}=0$. Substitution in matrix mutation gives
+\begin{equation}\label{eq:ambient-mutation}
+ \mu_k(A+E)=\mu_k(A)+E.
+\end{equation}
+Thus a word supported in $\iota(I)$ has the same complete pivot and deletion
+vertex expressions as the strip computation, with zero exterior entries.
+The summand $E$ remains unchanged throughout.
+This also permits arbitrary attachments along the unmutated sides of a
+local triangle or two-triangle configuration.
+
+The proof removes triangle interiors and then successive edge layers.
+The local words avoid the interface edges of their configurations.
+Mutation commutes with restriction to any live subset containing the pivot.
+Together with $\mu_k^2=\mathrm{id}$ this gives, for $s\notin W$,
+\begin{equation}\label{eq:undo}
+ \mu_{W^{\mathrm{rev}}}\bigl((\mu_W B)|_{U\setminus\{s\}}\bigr)
+ =B|_{U\setminus\{s\}}.
+\end{equation}
+Consequently each completed deletion move restores every retained entry.
+Additional deletions away from its word and its deletion vertex preserve
+both its calculation and its source or sink condition.
+
+\newpage
+\section{Deleting triangle interiors}
+Number an edge by $1\le k\le n-1$. Deletion to depth $p$ removes
+$k\le p$ or $k\ge n-p$. In a triangle with boundary side $c=0$, put
+\begin{equation}\label{eq:Cp}
+ C_p=\{(a,b,c)\in\Z_{>0}^3:a+b+c=n,\quad
+                   a+c\le p\ \text{or}\ b+c\le p\}.
+\end{equation}
+Thus $C_0=C_1=\varnothing$. The retained sides before deletions are
+$D_k=(n-k,0,k)$ and $R_k=(0,n-k,k)$.
+
+\begin{lemma}\label{lem:triangle}
+Suppose $1\le p\le(n-1)/2$. Delete both nonboundary edges to depth $p$
+and delete $C_p$. There are deletion moves removing $C_{p+1}\setminus C_p$
+whose words and deleted vertices are all interior to the triangle.
+\end{lemma}
+
+The source proof deletes $a+c=p+1$ in decreasing order of $a$, then exchanges
+$a$ and $b$. If $n=3$, $p=1$, the only interior vertex is isolated.
+For $n\ge4$, put $b_0=n-p-1$. At the deletion of
+\[
+ s_a=(a,b_0,p+1-a)\qquad(a=p,p-1,\ldots,1),
+\]
+use the word
+\begin{equation}\label{eq:triangle-word}
+ v_1,\ldots,v_{b_0-1},\qquad v_b=(a,b,n-a-b),\qquad v_{b_0}=s_a.
+\end{equation}
+Every pivot is interior and remains present, since
+\[
+ a+(n-a-b)=n-b\ge p+2,\qquad
+ b+(n-a-b)=n-a\ge n-p\ge p+1.
+\]
+The word also avoids the already deleted $s_{a'}$ with $a'>a$.
+
+Put $A_b=(a-1,b+1,n-a-b)$ and $B_b=(a+1,b,n-a-b-1)$.
+The incoming neighbours of $v_1$ are the present vertices among $A_1,B_1$.
+The neighbour $(a,0,n-a)$ is deleted from its edge. The exceptions are
+\[
+ A_1=(0,2,n-2)\text{ absent if }a=1,\ p\ge2;
+ \qquad B_1\in C_p\text{ if }n=2p+1,\ a=p.
+\]
+For $2\le b\le b_0-1$, the complete expression before mutation is
+\begin{equation}\label{eq:triangle-pivot}
+ \rho_{\mathrm{pre}}(v_b)=\e_{v_{b-1}}+\e_{v_{b+1}}-\e_{A_b}-\e_{B_b}.
+\end{equation}
+The cycles in \eqref{eq:cycles} give this successively. Earlier pivots
+$v_1,\ldots,v_{b-2}$ do not change the arrows at $v_b$.
+Paths through $v_{b-1}$ cancel the outgoing arrows off the line
+$a=\mathrm{constant}$, and $v_{b-1}\to v_b$ reverses.
+
+Before the last mutation, the deletion vertex satisfies
+\[
+ \rho_{\mathrm{pre}}(s_a)=\e_{A_{b_0-1}}+\e_{B_{b_0-1}}-\e_{v_{b_0-1}}.
+\]
+Its other possible neighbours lie in $C_p$, on a deleted edge portion,
+on $c=0$, or at $s_{a+1}$. Mutation at $v_{b_0-1}$ therefore gives
+\begin{equation}\label{eq:triangle-final}
+ \rho_{\mathrm{final}}(s_a)=\e_{v_{b_0-1}}.
+\end{equation}
+Delete $s_a$ and undo the word using \eqref{eq:undo}. Exchanging $a,b$
+reverses all arrows and gives the other family of deletion moves.
+Its pivots have $b\le p$, whereas the first deleted family has $b=b_0\ge p$.
+When $b_0=p$, equivalently $n=2p+1$, skip $(p,p,1)$, already deleted.
+These are the endpoint and overlap cases of Lemma~\ref{lem:triangle}.
+
+\newpage
+\section{Two triangles and the common-edge word}
+Place the two oriented triangles in $[0,n]^2$ by
+\[
+ x(a,b,c)=(b+c,c),\qquad y(a,b,c)=(b,b+c).
+\]
+Their omitted boundary sides are $c=0$ in $x$ and $a=0$ in $y$.
+The labels are
+\begin{align*}
+ D_k&=x(n-k,0,k)=y(n-k,k,0)=(k,k),&&1\le k\le n-1,\\
+ X_{i,j}&=x(n-i,i-j,j)=(i,j),&&1\le j<i\le n-1,\\
+ Y_{i,j}&=y(n-j,i,j-i)=(i,j),&&1\le i<j\le n-1,\\
+ L_j&=y(n-j,0,j)=(0,j),&&1\le j\le n-1,\\
+ R_j&=x(0,n-j,j)=(n,j),&&1\le j\le n-1.
+\end{align*}
+Set $X_{n,j}=R_j$. Boundary or deleted labels contribute zero.
+For the $y$ triangle, use $(b,c,a)$ in \eqref{eq:Cp}.
+The map
+\begin{equation}\label{eq:halfturn}
+ H(i,j)=(n-i,n-j)
+\end{equation}
+preserves the arrows and interchanges $D_k,D_{n-k}$.
+Every adjacent pair of strip triangles has this matrix or its negative.
+Both identifications must follow from the glued cycles, including all
+vertices on $L$ and $R$.
+
+\begin{lemma}\label{lem:edge}
+Suppose $0\le p<\lfloor n/2\rfloor$. Delete the three edges $L,D,R$ to
+depth $p$ and delete $C_{p+1}$ in each triangle. Deletion moves remove
+$D_{n-p-1}$ and $D_{p+1}$, counted only once if they coincide.
+All words and deleted vertices lie in the two triangle interiors or on $D$.
+\end{lemma}
+
+When $n=2p+2$, the two endpoints coincide and the source gives
+\[
+ \rho_Q(D_{p+1})=-\e_{x(p,1,p+1)}-\e_{y(p+1,p,1)}.
+\]
+It is a sink, with the absent-label convention; no mutation is needed.
+This includes the rank-two calculation at $p=0$.
+
+For $n\ge2p+3$, put
+\[
+ r=p+2,\qquad t=n-p-1,\qquad s=D_t.
+\]
+The word that makes $s$ a sink is
+\begin{equation}\label{eq:edge-word}
+ D_{p+1},\ldots,D_{t-1};\quad
+ X_{r,r-1},\ldots,X_{r,1};\quad\cdots;\quad
+ X_{t,t-1},\ldots,X_{t,1}.
+\end{equation}
+The semicolons only separate successive portions of the word.
+For an $X$ vertex, membership in $C_{p+1}$ means
+$i\le p+1$ or $i-j\ge t$. Every displayed $X_{i,j}$ remains present because
+\[
+ r\le i\le t,\qquad 1\le j<i,\qquad i-j\le t-1.
+\]
+All displayed diagonal vertices remain present as well.
+The word avoids $s$ and every $L_k,R_k$. After it, delete $s$ and undo
+the mutations. The second endpoint is treated on the following pages.
+
+\newpage
+\section{Complete expressions during the common-edge word}
+For $r\le i<t$, the expression before mutating the top vertex is
+\begin{equation}\label{eq:top}
+ \rho_{\mathrm{pre}}(X_{i,i-1})
+ =-\e_{D_{i-1}}+\e_{D_i}-\e_{X_{i+1,i-1}}+\e_{X_{i,i-2}}.
+\end{equation}
+At $i=t$ it is
+\begin{equation}\label{eq:last}
+ \begin{split}
+ \rho_{\mathrm{pre}}(X_{t,t-1})={}&-\e_{D_{t-1}}-\e_s-\e_{X_{t+1,t-1}}\\
+ &+\e_{X_{t+1,t}}+\e_{Y_{t-1,t}}+\e_{X_{t,t-2}}.
+ \end{split}
+\end{equation}
+For $r\le i\le t$ and $1\le j<i-1$, put
+\[
+ K_{ij}=\begin{cases}D_{p+1},&i=r,\\X_{i-1,j},&i>r.\end{cases}
+\]
+Then the lower vertices satisfy
+\begin{equation}\label{eq:lower}
+ \begin{split}
+ \rho_{\mathrm{pre}}(X_{i,j})={}&-\e_{K_{ij}}-\e_{X_{i+1,j}}
+       +\e_{X_{i,j+1}}+\e_{X_{i,j-1}}-\mathbf1_{i=t}\e_s.
+ \end{split}
+\end{equation}
+These are identities on the entire live set. A proof must establish that
+every unlisted coefficient is zero, including coefficients at interface vertices.
+
+The diagonal part of \eqref{eq:edge-word} meets $X_{i,i-1}$ only through
+$D_{i-1},D_i$. Both are mutated for $i<t$; $D_t=s$ is not mutated.
+No preceding $X_{h,j}$ with $h<i$ changes this top expression.
+This gives \eqref{eq:top} and \eqref{eq:last} from matrix mutation.
+
+After the diagonal mutations, the lower expression is
+\[
+ \begin{split}
+ \rho_Q(X_{i,j})={}&\e_{X_{i+1,j+1}}-\e_{X_{i+1,j}}-\e_{X_{i,j+1}}\\
+ &+\e_{X_{i,j-1}}+\e_{X_{i-1,j}}-\e_{X_{i-1,j-1}}.
+ \end{split}
+\]
+For $i=r$, mutation at $X_{r,j+1}$ cancels the arrow to $X_{r+1,j+1}$
+and creates the arrow from $D_{p+1}$.
+For $i>r$, only the preceding mutations at $X_{i-1,j}$ and $X_{i,j+1}$
+affect $X_{i,j}$. The former cancels the arrow from $X_{i-1,j-1}$
+and creates an arrow to $X_{i-1,j+1}$, interpreted as $D_{i-1}$ when
+$j=i-2$. The latter cancels the arrows to $X_{i-1,j+1}$ and $X_{i+1,j+1}$.
+Reversing the arrows incident to these two pivots gives \eqref{eq:lower}.
+
+Only the mutations at $X_{t,j}$ affect $s$. Before the top one,
+\[
+ \rho_{\mathrm{pre}}(s)=\e_{X_{t,t-1}}-\e_{X_{t+1,t}}-\e_{Y_{t-1,t}}.
+\]
+The possible neighbour $Y_{t,t+1}$ is on the boundary for $p=0$ and lies
+in $C_{p+1}$ for $p\ge1$. Mutation at $X_{t,t-1}$ cancels the two negative
+terms. After mutating $X_{t,j}$, the expression becomes
+\[
+ \rho_Q(s)=-\e_{X_{t,j}}+\e_{X_{t,j-1}}
+ \qquad(j=t-1,t-2,\ldots,1).
+\]
+Since $X_{t,0}$ is absent, the word ends with
+\begin{equation}\label{eq:edge-final}
+ \rho_{\mathrm{final}}(s)=-\e_{X_{t,1}}.
+\end{equation}
+This is the source proof's decisive sink calculation.
+
+\newpage
+\section{The second endpoint and additional deletions}
+After deleting $D_t$ and undoing its word, apply the half-turn
+\eqref{eq:halfturn}. In the rotated coordinates, $D_{p+1}$ is already
+absent and the new deletion vertex is $D_t$. Hence the word in
+\eqref{eq:edge-word} must omit its first mutation at $D_{p+1}$.
+In the original coordinates the deleted endpoint was $D_t$, and the
+new deletion vertex is $D_{p+1}$.
+
+If $r<t$, replace $D_{p+1}$ by $Y_{p+1,p+2}$ in \eqref{eq:top}
+and \eqref{eq:lower} at $i=r$. Explicitly, the modified top expression is
+\[
+ \rho_{\mathrm{pre}}(X_{r,r-1})
+ =-\e_{Y_{p+1,p+2}}+\e_{D_r}
+   -\e_{X_{r+1,r-1}}+\e_{X_{r,r-2}},
+\]
+and the lower expressions use $K_{rj}=Y_{p+1,p+2}$.
+The mutation at $D_r$ leaves the arrow from $Y_{p+1,p+2}$ which the
+omitted mutation would have cancelled. All other formulas, including
+\eqref{eq:edge-final}, are unchanged.
+
+If $r=t$, equivalently $n=2p+3$, the diagonal portion of the second word
+is empty. Omit $-\e_{D_{t-1}}+\e_{Y_{t-1,t}}$ from \eqref{eq:last}, giving
+\[
+ \rho_{\mathrm{pre}}(X_{t,t-1})
+ =-\e_s-\e_{X_{t+1,t-1}}+\e_{X_{t+1,t}}+\e_{X_{t,t-2}}.
+\]
+Omit $-\e_{K_{tj}}$ from \eqref{eq:lower} as well. In the rotated
+coordinates the final expression is
+\begin{equation}\label{eq:second-final}
+ \rho_{\mathrm{final}}(D_t)=-\e_{X_{t,1}}-\e_{Y_{t-1,t}}.
+\end{equation}
+Both coefficients are nonpositive. Thus the second deletion is valid
+also at this shortest nontrivial word. The coincident-endpoint case
+$n=2p+2$ was handled before forming either word.
+
+The modified word is not justified merely by restricting the first
+calculation: the removed vertex was itself the first pivot. The modified
+identities above must be proved separately from the mutation formula.
+They are also required for $p=0$, including the rank-three case.
+
+Other previously deleted interface vertices are different. No $L_j$ or
+$R_j$ occurs as a pivot or deletion vertex in these words. For any subset
+$F$ of those vertices, restriction commutes with each mutation, so
+\[
+ (\mu_W Q)|_{U\setminus F}=\mu_W(Q|_{U\setminus F}).
+\]
+Restricting a nonpositive or nonnegative expression preserves its sign.
+This proves validity when neighbouring edge deletions have removed more
+than the local depth hypothesis requires. Equation~\eqref{eq:ambient-mutation}
+gives the same conclusion in an ambient quiver attached along $L,R$.
+
+Arrow reversal is also harmless:
+\[
+ \mu_k(-B)=-\mu_k(B).
+\]
+It interchanges the source and sink conditions. These facts apply to the
+alternating orientations of adjacent strip pairs. They do not permit
+omitting a live interface coefficient when checking a complete expression.
+
+\newpage
+\section{The rounds for arbitrary strip length}
+Put $q=\lfloor n/2\rfloor$. Apply Lemma~\ref{lem:edge} with $p=0$ to
+$e_1,\ldots,e_{2N-1}$ in increasing order. Since $C_1=\varnothing$,
+each common edge is deleted to depth $1$. Earlier moves only add
+deletions on the next pair's $L$ or $R$ edge. The restriction argument
+above proves that its words remain valid.
+
+After round $p$, the source proof records
+\begin{equation}\label{eq:round}
+ \begin{aligned}
+ &k\le p\text{ or }k\ge n-p\text{ deleted on }e_j,
+       &&p\le j\le2N-p,\\
+ &C_p\text{ deleted in }\tau_i,
+       &&p\le i\le2N-p+1.
+ \end{aligned}
+\end{equation}
+The completed matrix is the restriction of the original ambient matrix
+to the remaining vertices. Every previous mutation and deletion belongs
+to $\iota(I)$. Both assertions must be retained in the induction.
+
+Suppose $1\le p<q$. For $p+1\le i\le2N-p$, both nonboundary edges of
+$\tau_i$ have depth $p$. Apply Lemma~\ref{lem:triangle} to remove
+$C_{p+1}\setminus C_p$ in each of these triangles. Then apply
+Lemma~\ref{lem:edge} to
+\[
+ e_{p+1},e_{p+2},\ldots,e_{2N-p-1}
+\]
+in increasing order. Each adjacent pair has the required interior
+deletions. Additional deletions on its exterior edges are allowed by
+restriction. This proves \eqref{eq:round} for $p+1$.
+
+More explicitly, the listed operations leave exactly depth
+$\min\{p,j,2N-j\}$ on $e_j$, and delete exactly
+$C_{\min\{p,i,2N-i+1\}}$ in $\tau_i$ after round $p\ge1$.
+These equalities record the deletions outside the central range in
+\eqref{eq:round}; no larger rank-dependent strip-length assumption is used.
+
+Since $N\ge q$, the edge $e_N$ is in the range $q\le j\le2N-q$.
+Its remaining vertices would satisfy $q<k<n-q$. If $n=2q$ this interval
+is empty; if $n=2q+1$ it contains no integer. Thus every lattice vertex
+on $e_N$ has been deleted. This argument uses the edge index $N$ and
+does not assume $N$ is even.
+
+No common edge in these rounds is $e_0$ or $e_{2N}$.
+The triangle words are interior; the common-edge words avoid $L$ and $R$.
+Hence every mutation and deletion belongs to $\iota(I)$.
+Composing \eqref{eq:undo} gives
+\[
+ \iota(L(e_N))\subseteq Z\subseteq\iota(I),\qquad
+ B_{\mathrm{final}}=B|_{V\setminus Z}.
+\]
+
+\section{Formal correspondence and verification}
+Prove the equivalence between the chosen finite representation and the
+glued triangle lattice before applying the local calculations to the
+strip. For an embedded strip in a surface, split the triangle sum into
+strip and exterior triangles. Every exterior summand has zero entries
+at vertices in $\iota(I)$, which verifies the ambient hypothesis.
+
+The source locators are \texttt{lem:triangle-shell} (lines 3575--3654),
+\texttt{lem:edge-layer} (3860--3980), and the main theorem
+(statement 3402--3409, proof 4119--4161). The FG construction is at
+3134--3151; the two-triangle coordinates are at 3767--3792.
+The delivered source-to-Lean map must name the final theorem, the local
+results actually used, and all hypotheses of the ambient application.
+
+Build in a pinned Lean/mathlib environment and check a fresh importing
+consumer. The transitive \texttt{\#print axioms} audit permits only
+\texttt{propext}, \texttt{Classical.choice}, and \texttt{Quot.sound}.
+Finite exact computations are supplementary. The supplied checker passed
+for $2\le n\le8$ during preparation. It uses
+$N=n\mathbin{//}2$, has no arbitrary exterior attachment, and gives
+$N=1$ for $n=2,3$, outside the paper's $N\ge2$ hypothesis.
+It does not prove any universally quantified local identity or the
+arbitrary-$N$ induction. Report any failed identity with its exact
+source location, and distinguish unfinished obligations from a completed
+kernel-checked theorem.
+\end{document}

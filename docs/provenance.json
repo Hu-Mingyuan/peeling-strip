@@ -1,0 +1,10 @@
+{
+  "manuscript_commit": "7e310e01df64e38be583500fc81a8ef1a001a196",
+  "source_date": "2026-11-14",
+  "files": [
+    {
+      "path": "references/verify_fg_strips.py",
+      "sha256": "8601d163062ad46b6b4589cd8019e781dc631ce81415dcf593f488b091783bda"
+    }
+  ]
+}

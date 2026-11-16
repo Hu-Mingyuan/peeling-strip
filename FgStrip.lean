@@ -1,0 +1,1 @@
+import FgStrip.Proposition74

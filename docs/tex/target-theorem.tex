@@ -1,0 +1,207 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,mathtools}
+\usepackage[margin=25mm]{geometry}
+\usepackage{microtype,booktabs,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\N}{\mathbb N}
+\newcommand{\strip}{\mathrm{strip}}
+\newcommand{\pos}[1]{[#1]_+}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist{nosep,leftmargin=*}
+\title{Deletion of the middle edge of an FG strip\\\large A theorem of \emph{Ice and mirrors}: formalization target}
+\author{Cluster HMS}
+\date{14 November 2026}
+\begin{document}
+\maketitle
+\vspace{-1.5em}
+This document specifies the theorem to be proved in Lean. Its mathematical source is
+the strip-deletion theorem of \emph{Ice and mirrors}.
+The source commit is
+\begin{center}\texttt{7e310e01df64e38be583500fc81a8ef1a001a196}.\end{center}
+The accompanying blueprint records the supplied proof. Neither document asserts that
+the Lean formalization is complete.
+
+\section{The strip and its integer matrix}
+Fix integers
+\[
+ n\ge2,\qquad q=\lfloor n/2\rfloor,\qquad N\ge\max\{q,2\}.
+\]
+The strip has distinct polygon vertices $T_0,\ldots,T_N,B_0,\ldots,B_N$.
+Its oriented triangles, with the displayed cyclic orders, are
+\[
+ \tau_{2i+1}=(T_{i+1},T_i,B_i),\qquad
+ \tau_{2i+2}=(B_i,B_{i+1},T_{i+1})\qquad(0\le i<N).
+\]
+Put
+\[
+ e_{2i}=T_iB_i\quad(0\le i\le N),\qquad
+ e_{2i+1}=T_{i+1}B_i\quad(0\le i<N),\qquad \ell=e_N.
+\]
+Thus $\tau_j$ lies between $e_{j-1}$ and $e_j$. The distinguished edge is
+$e_N$ also when $N$ is odd; it is then a diagonal $T_{(N+1)/2}B_{(N-1)/2}$.
+
+In an oriented triangle $(U_0,U_1,U_2)$ take the lattice points
+\[
+ (a,b,c)\in\Z_{\ge0}^3,\qquad a+b+c=n,
+ \qquad (a,b,c)\notin\{(n,0,0),(0,n,0),(0,0,n)\}.
+\]
+The coordinates are the weights at $U_0,U_1,U_2$. Points on a shared edge
+are identified when their weights at its two endpoints agree. For each
+$a,b,c\ge0$ with $a+b+c=n-2$, add the three arrows
+\begin{equation}\label{eq:cycle}
+ (a+1,b+1,c)\longrightarrow(a,b+1,c+1)
+ \longrightarrow(a+1,b,c+1)\longrightarrow(a+1,b+1,c).
+\end{equation}
+Sum the signed arrow multiplicities after gluing. Omit all lattice points
+on $T_iT_{i+1}$ and $B_iB_{i+1}$, for $0\le i<N$, and their incident arrows.
+These are the actual top and bottom boundary segments. The lattice points
+on $e_0$ and $e_{2N}$ are retained.
+
+Let $V_{\strip}$ be the resulting finite set. Its matrix is
+\[
+ B_{\strip}(u,v)=\#(u\longrightarrow v)-\#(v\longrightarrow u)\in\Z.
+\]
+In particular, opposite arrows cancel and $B_{\strip}(u,v)=-B_{\strip}(v,u)$.
+Write $L(e_j)\subset V_{\strip}$ for the $n-1$ lattice points on $e_j$, and put
+\[
+ P=L(e_0)\cup L(e_{2N}),\qquad I=V_{\strip}\setminus P.
+\]
+
+\newpage
+\section{Ambient matrices and deletion moves}
+Let $V$ be any finite set and $\iota:V_{\strip}\hookrightarrow V$ an injection.
+Extend the strip matrix by zero to $V$ and denote the extension by
+$B_{\strip,\mathrm{ext}}$. The input matrix is
+\begin{equation}\label{eq:ambient}
+ B=B_{\strip,\mathrm{ext}}+E,\qquad
+ E_{uv}=-E_{vu},\qquad
+ E_{\iota(x),v}=0\quad(x\in I,\ v\in V).
+\end{equation}
+The block $E|_{V\setminus\iota(I)}$ is arbitrary. It includes arrows between
+protected vertices, arrows from protected vertices to exterior vertices,
+and arrows between exterior vertices. Consequently the full induced matrix
+on $\iota(V_{\strip})$ need not equal $B_{\strip}$.
+
+For a live vertex set $U\subseteq V$, an integer skew-symmetric matrix $A$
+on $U$, and $k\in U$, define $\pos{x}=\max\{x,0\}$ and
+\begin{equation}\label{eq:mutation}
+ (\mu_k A)_{ij}=\begin{cases}
+ -A_{ij},&i=k\text{ or }j=k,\\
+ A_{ij}+\pos{A_{ik}}\pos{A_{kj}}-
+             \pos{-A_{ik}}\pos{-A_{kj}},&i,j\ne k.
+ \end{cases}
+\end{equation}
+A word $W=(k_1,\ldots,k_m)$ acts in the listed order, so
+$\mu_W A=\mu_{k_m}\cdots\mu_{k_1}A$. The empty word acts as the identity.
+Let $W^{\mathrm{rev}}=(k_m,\ldots,k_1)$.
+
+A \emph{deletion move} at $s\in U$ consists of a word in $U\setminus\{s\}$
+such that
+\begin{equation}\label{eq:sign}
+ \bigl(\forall v\in U,\ (\mu_W A)_{sv}\ge0\bigr)
+ \quad\text{or}\quad
+ \bigl(\forall v\in U,\ (\mu_W A)_{sv}\le0\bigr),
+\end{equation}
+followed by deletion of $s$ and the reversed word. Deletion means restriction
+to $U\setminus\{s\}$. The output is
+\begin{equation}\label{eq:undo}
+ \mu_{W^{\mathrm{rev}}}
+ \bigl((\mu_W A)|_{U\setminus\{s\}}\bigr)
+ =A|_{U\setminus\{s\}}.
+\end{equation}
+This equality must be proved from mutation involutivity and compatibility
+with restriction away from the mutation vertex, or obtained from verified
+library results. The sign condition is tested against every live ambient
+vertex, including the protected and exterior vertices.
+
+\begin{theorem}\label{thm:target}
+For every $n,N,V,\iota,E$ satisfying the conditions above, there is a finite
+sequence of deletion moves for $B$ whose deleted set $Z$ satisfies
+\[
+ \iota(L(e_N))\subseteq Z\subseteq\iota(I).
+\]
+Every mutation vertex belongs to $\iota(I)$ and is present when mutated.
+Each mutation word avoids its deletion vertex. The final live set and matrix are
+\[
+ V\setminus Z,\qquad B|_{V\setminus Z}.
+\]
+In particular, no vertex of $\iota(P)$ or $V\setminus\iota(V_{\strip})$
+is mutated or deleted.
+\end{theorem}
+
+The quantifiers over the rank, strip length, exterior vertices, and permitted
+matrix $E$ are unrestricted. Existence of suitable deletion moves is the
+conclusion, not part of the input data.
+
+\newpage
+\section{The application to a triangulated surface}
+Consider the mutable FG quiver of an oriented triangulated surface containing
+the embedded strip above. Its top and bottom segments lie on the actual
+surface boundary, whose lattice points have been omitted. Assume the strip
+embeds without identifications of its distinct lattice vertices. The other
+triangles meet the strip only along $e_0$, $e_{2N}$, or the omitted boundary.
+
+The triangle sum for the ambient quiver splits as
+\[
+ B_S=B_{\strip,\mathrm{ext}}+
+       \sum_{\tau\ \text{outside the strip}}B_{\tau,\mathrm{ext}}.
+\]
+No triangle outside the strip contains a retained lattice vertex in
+$\iota(I)$. Therefore the second summand satisfies \eqref{eq:ambient}.
+Theorem~\ref{thm:target} gives the theorem for this quiver.
+The formal deliverable must include this application, or an explicit
+combinatorial application theorem with these hypotheses verified from
+the embedded triangle construction.
+
+An internal grid or sum-type representation is permitted. Its vertices,
+edge identifications, omitted boundary points, and matrix entries must be
+identified with the glued construction in Section~1. In particular, a theorem
+for an unspecified matrix with assumed local deletion properties does not
+establish Theorem~\ref{thm:target}.
+
+\section{Source correspondence and acceptance}
+The proof-to-code map must give actual Lean declaration names for the
+following mathematical objects and conclusions.
+\begin{center}
+\begin{tabular}{@{}p{.58\linewidth}p{.34\linewidth}@{}}
+\toprule
+Mathematical content & Source in \texttt{main.tex}\\
+\midrule
+Triangle lattice, cycles, gluing, boundary omission & lines 3134--3151\\
+Strip, deletion moves, main theorem & lines 3368--3409\\
+Edge depths and triangle subsets $C_p$ & lines 3498--3509\\
+Triangle-interior deletion & lines 3575--3654\\
+Two-triangle coordinates & lines 3767--3792\\
+Common-edge deletion and omitted mutation & lines 3860--3980\\
+Rounds and removal of $e_N$ & lines 4119--4161\\
+\bottomrule
+\end{tabular}
+\end{center}
+The map must also identify the ambient extension hypothesis, mutation
+convention, live vertex sets, and the exact conclusion of
+Theorem~\ref{thm:target}. If the proof uses different intermediate results,
+record how they establish the same statement.
+
+Acceptance requires pinned Lean and mathlib versions, a reproducible
+successful build, and a fresh consumer file importing the delivered theorem.
+Audit its transitive axioms with \texttt{\#print axioms}, together with the
+local theorems used in its proof. The only allowed axioms are
+\[
+ \texttt{propext},\qquad \texttt{Classical.choice},\qquad \texttt{Quot.sound}.
+\]
+No \texttt{sorry}, \texttt{admit}, custom axiom, unsafe proof bypass, or
+additional trust from native evaluation is permitted.
+
+The exact-integer script \texttt{verify\_fg\_strips.py} passed its checks for
+$2\le n\le8$ during preparation. This is debugging evidence only.
+Its global construction fixes $N=n\mathbin{//}2$ and has no arbitrary
+exterior attachment. For $n=2,3$ it gives $N=1$, outside the required $N\ge2$.
+Finite checks cannot replace the quantified theorem. The final report must
+separate completed Lean results from unresolved obligations and identify
+any source-proof correction explicitly.
+\end{document}
