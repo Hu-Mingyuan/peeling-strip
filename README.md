@@ -1,6 +1,6 @@
 # Peeling strip
 
-Lean formalization of a theorem from *Ice and mirrors*. For every rank `n ≥ 2` and strip length `N ≥ max (n / 2) 2`, a finite sequence of supported deletion moves removes every lattice vertex on the middle edge `e_N`. No vertex on the two end edges is mutated or deleted. The resulting matrix is the full induced submatrix of the original matrix.
+Lean formalization of Proposition 2.7 of *Ice and mirrors* ([arXiv:2611.21484](https://arxiv.org/abs/2611.21484)). For every rank `n ≥ 2` and strip length `N ≥ max (n / 2) 2`, a finite sequence of supported deletion moves removes every lattice vertex on the middle edge `e_N`. No vertex on the two end edges is mutated or deleted. The resulting matrix is the full induced submatrix of the original matrix.
 
 This repository contains a combinatorial quiver theorem, not a formalization of homological mirror symmetry. No GitHub Pages deployment is configured.
 
@@ -32,7 +32,7 @@ The argument includes odd and even `N`, both endpoint deletions, the omitted fir
 | Arbitrary strip length and round induction | `FgStrip/Rounds.lean` and its supporting modules |
 | Ambient application and final theorem | `FgStrip/AmbientTriangulation.lean`, `FgStrip/Proposition74.lean` |
 
-The mathematical source is the strip-deletion theorem of *Ice and mirrors*. The accepted library source hashes are recorded in [accepted-library.json](verification/accepted-library.json).
+The mathematical source is Proposition 2.7 of *Ice and mirrors* ([arXiv:2611.21484](https://arxiv.org/abs/2611.21484)). The Lean declarations are named `Proposition74`; this is Proposition 2.7 in the arXiv version. The accepted library source hashes are recorded in [accepted-library.json](verification/accepted-library.json).
 
 ## Reproduce the checks
 
